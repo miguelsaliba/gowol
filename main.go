@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	flag "github.com/spf13/pflag"
 	"log/slog"
 	"net"
 	"os"
@@ -16,10 +16,10 @@ const (
 )
 
 func main() {
-	port := flag.Uint("port", defaultPort, "Port to send the WOL packet to")
-	broadcast := flag.String("broadcast", defaultBroadcast, "Broadcast IP address to send the WOL packet to")
-	help := flag.Bool("help", false, "Show usage information")
-	verbose := flag.Bool("verbose", false, "Enable verbose logging")
+	port := flag.UintP("port", "p", defaultPort, "Port to send the WOL packet to")
+	broadcast := flag.StringP("broadcast", "b", defaultBroadcast, "Broadcast IP address to send the WOL packet to")
+	help := flag.BoolP("help", "h", false, "Show usage information")
+	verbose := flag.BoolP("verbose", "v", false, "Enable verbose logging")
 
 	flag.Parse()
 
@@ -37,7 +37,7 @@ func main() {
 
 	ip := net.ParseIP(*broadcast)
 	if ip == nil {
-		slog.Error("Invalid broadcast IP address", "ip", broadcast)
+		slog.Error("Invalid broadcast IP address", "ip", *broadcast)
 		os.Exit(1)
 	}
 
