@@ -1,30 +1,31 @@
 package main
 
 import (
-	"bytes"
-	"encoding/hex"
-	"fmt"
+	"log/slog"
 	"net"
+
+	"github.com/miguelsaliba/gowol/wol"
 )
 
 const (
+	mac       = "112233445566"
 	broadcast = "255.255.255.255"
-	mac = "112233445566"
+	port      = 9
 )
 
 func main() {
-	conn, err := net.Dial("udp", broadcast+":9")
-	if err != nil {
-		fmt.Println("Error sending packet", err)
-		return
+	ip := net.ParseIP(broadcast)
+	if ip == nil {
+		slog.Error("Invalid broadcast IP address", "ip", broadcast)
 	}
-	defer conn.Close()
 
-	synchronization := bytes.Repeat([]byte{0xFF}, 6)
+	macAddress, err := wol.ParseMac(mac)
+	if err != nil {
+		slog.Error("Invalid MAC address", "mac", mac, "error", err)
+	}
 
-	macBytes, _ := hex.DecodeString(mac)
-
-	repeatedMac := bytes.Repeat(macBytes, 16)
-
-	conn.Write(append(synchronization, repeatedMac...))
+	err = wol.Wol(ip, port, macAddress)
+	if err != nil {
+		slog.Error("Failed to send WOL packet", "error", err)
+	}
 }
