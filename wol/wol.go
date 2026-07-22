@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 )
 
@@ -48,5 +49,11 @@ func Wol(ip net.IP, port uint16, mac MACAddress) error {
 		return fmt.Errorf("failed to send WOL packet: %w", err)
 	}
 
+	slog.Debug("WOL packet successfully sent to", "IP", ip, "Port", port, "MAC", mac)
+
 	return nil
+}
+
+func (m MACAddress) String() string {
+	return net.HardwareAddr(m[:]).String()
 }
