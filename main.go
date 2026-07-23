@@ -56,6 +56,9 @@ func main() {
 
 func printUsage() {
 	w := flag.CommandLine.Output()
-	fmt.Fprintf(w, "Usage: gowol <MAC_ADDRESS>\n")
+	fmt.Fprintln(w, "Usage:")
+	fmt.Fprintln(w, "\tgowol <mac_address> [arguments]")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "Arguments:")
 	flag.PrintDefaults()
 }
