@@ -26,6 +26,11 @@ func ParseMac(mac string) (MACAddress, error) {
 	return MACAddress(parsed), nil
 }
 
+func createMagicPacket(mac MACAddress) []byte {
+	syncStream := bytes.Repeat([]byte{0xFF}, 6)
+	return append(syncStream, bytes.Repeat(mac[:], 16)...)
+}
+
 func Wol(ip net.IP, port uint16, mac MACAddress) error {
 	if ip == nil {
 		return ErrInvalidIP
@@ -42,8 +47,7 @@ func Wol(ip net.IP, port uint16, mac MACAddress) error {
 	}
 	defer conn.Close()
 
-	syncStream := bytes.Repeat([]byte{0xFF}, 6)
-	packet := append(syncStream, bytes.Repeat(mac[:], 16)...)
+	packet := createMagicPacket(mac)
 
 	if _, err := conn.Write(packet); err != nil {
 		return fmt.Errorf("failed to send WOL packet: %w", err)

@@ -1,8 +1,11 @@
 package wol
 
 import (
+	"bytes"
 	"errors"
+	"net"
 	"testing"
+	"time"
 )
 
 func TestParseMac(t *testing.T) {
@@ -38,5 +41,57 @@ func TestParseMac(t *testing.T) {
 			}
 		})
 
+	}
+}
+
+func TestCreateMagicPacket(t *testing.T) {
+	mac := MACAddress{0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x01}
+
+	packet := createMagicPacket(mac)
+
+	expected := append(
+		bytes.Repeat([]byte{0xFF}, 6),
+		bytes.Repeat(mac[:], 16)...,
+	)
+
+	if !bytes.Equal(packet, expected) {
+		t.Fatalf("packet mismatch:\ngot:  % X\nwant: % X", packet, expected)
+	}
+
+	if len(packet) != 102 {
+		t.Fatalf("expected packet length 102, got %d", len(packet))
+	}
+}
+
+
+func TestWol_SendsCorrectPacket(t *testing.T) {
+	listener, err := net.ListenUDP("udp", &net.UDPAddr{
+		IP:   net.ParseIP("127.0.0.1"),
+		Port: 0,
+	})
+	if err != nil {
+		t.Fatalf("failed to start UDP listener: %v", err)
+	}
+	defer listener.Close()
+
+	addr := listener.LocalAddr().(*net.UDPAddr)
+	mac := MACAddress{0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x01}
+
+	if err := Wol(net.ParseIP("127.0.0.1"), uint16(addr.Port), mac); err != nil {
+		t.Fatalf("Wol returned error: %v", err)
+	}
+
+	buf := make([]byte, 128)
+	listener.SetReadDeadline(time.Now().Add(2 * time.Second))
+
+	n, _, err := listener.ReadFromUDP(buf)
+	if err != nil {
+		t.Fatalf("failed to read UDP packet: %v", err)
+	}
+
+	expected := createMagicPacket(mac)
+
+	if !bytes.Equal(buf[:n], expected) {
+		t.Fatalf("packet mismatch:\ngot:  % X\nwant: % X", buf[:n], expected)
 	}
 }
