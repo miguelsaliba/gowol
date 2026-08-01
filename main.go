@@ -17,43 +17,57 @@ const (
 	defaultPort      = 9
 )
 
+type cliFlags struct {
+	port      *uint
+	broadcast *string
+	help      *bool
+	verbose   *bool
+}
+
+func newFlagSet() (*flag.FlagSet, *cliFlags) {
+	fs := flag.NewFlagSet("gowol", flag.ContinueOnError)
+
+	flags := &cliFlags{
+		port:      fs.UintP("port", "p", defaultPort, "Port to send the WOL packet to"),
+		broadcast: fs.StringP("broadcast", "b", defaultBroadcast, "Broadcast IP address to send the WOL packet to"),
+		help:      fs.BoolP("help", "h", false, "Show usage information"),
+		verbose:   fs.BoolP("verbose", "v", false, "Enable verbose logging"),
+	}
+
+	return fs, flags
+}
+
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
 func run(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("gowol", flag.ContinueOnError)
+	fs, flags := newFlagSet()
 	fs.SetOutput(stderr)
-
-	// flags
-	port := fs.UintP("port", "p", defaultPort, "Port to send the WOL packet to")
-	broadcast := fs.StringP("broadcast", "b", defaultBroadcast, "Broadcast IP address to send the WOL packet to")
-	help := fs.BoolP("help", "h", false, "Show usage information")
-	verbose := fs.BoolP("verbose", "v", false, "Enable verbose logging")
 
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 
-	if *verbose {
+	if *flags.verbose {
 		options := &slog.HandlerOptions{Level: slog.LevelDebug}
 		slog.SetDefault(slog.New(slog.NewTextHandler(stderr, options)))
 	}
 
-	if fs.NArg() < 1 || *help {
+	if fs.NArg() < 1 || *flags.help {
 		printUsage(fs, stdout)
 		return 0
 	}
 
 	macStr := fs.Arg(0)
 
-	ip, mac, err := validateInputs(*broadcast, macStr)
+	ip, mac, err := validateInputs(*flags.broadcast, macStr)
 	if err != nil {
 		slog.Error(err.Error())
 		return 1
 	}
 
-	if err := wol.Wol(ip, uint16(*port), mac); err != nil {
+	if err := wol.Wol(ip, uint16(*flags.port), mac); err != nil {
 		slog.Error("Failed to send WOL packet", "error", err)
 		return 1
 	}

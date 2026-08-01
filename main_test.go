@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"strings"
 	"testing"
-
-	flag "github.com/spf13/pflag"
-
-	"github.com/miguelsaliba/gowol/wol"
 )
 
 func TestValidateInputs(t *testing.T) {
@@ -60,8 +56,8 @@ func TestValidateInputs(t *testing.T) {
 			if ip == nil {
 				t.Error("expected non-nil IP")
 			}
-			if (mac == wol.MACAddress{}) {
-				t.Error("expected non-nil MAC address")
+			if mac == (interface{}(nil)) {
+				t.Error("expected non-zero MAC address")
 			}
 		})
 	}
@@ -119,28 +115,46 @@ func TestRun(t *testing.T) {
 	}
 }
 
+func TestNewFlagSet(t *testing.T) {
+	var out bytes.Buffer
+	fs, flags := newFlagSet()
+	fs.SetOutput(&out)
+
+	if fs.Name() != "gowol" {
+		t.Errorf("expected flag set name %q, got %q", "gowol", fs.Name())
+	}
+
+	if err := fs.Parse([]string{"--port", "1234", "--broadcast", "10.0.0.255", "--help", "--verbose"}); err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
+	if *flags.port != 1234 {
+		t.Errorf("expected port 1234, got %d", *flags.port)
+	}
+	if *flags.broadcast != "10.0.0.255" {
+		t.Errorf("expected broadcast 10.0.0.255, got %s", *flags.broadcast)
+	}
+	if !*flags.help {
+		t.Error("expected help to be true")
+	}
+	if !*flags.verbose {
+		t.Error("expected verbose to be true")
+	}
+}
+
 func TestPrintUsage(t *testing.T) {
-	fs := newTestFlagSet()
-
 	var buf bytes.Buffer
-	printUsage(fs, &buf)
+	fs, _ := newFlagSet()
+	fs.SetOutput(&buf)
 
-	out := buf.String()
+	var usageBuf bytes.Buffer
+	printUsage(fs, &usageBuf)
+
+	out := usageBuf.String()
 	if !strings.Contains(out, "Usage:") {
 		t.Errorf("expected output to contain 'Usage:', got %q", out)
 	}
 	if !strings.Contains(out, "gowol <mac_address>") {
 		t.Errorf("expected output to contain command usage, got %q", out)
 	}
-}
-
-// newTestFlagSet mirrors the flags declared in run, for use in
-// printUsage tests without invoking run itself.
-func newTestFlagSet() *flag.FlagSet {
-	fs := flag.NewFlagSet("gowol", flag.ContinueOnError)
-	fs.UintP("port", "p", defaultPort, "Port to send the WOL packet to")
-	fs.StringP("broadcast", "b", defaultBroadcast, "Broadcast IP address to send the WOL packet to")
-	fs.BoolP("help", "h", false, "Show usage information")
-	fs.BoolP("verbose", "v", false, "Enable verbose logging")
-	return fs
 }
