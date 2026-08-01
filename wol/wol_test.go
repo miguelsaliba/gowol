@@ -63,7 +63,6 @@ func TestCreateMagicPacket(t *testing.T) {
 	}
 }
 
-
 func TestWol_SendsCorrectPacket(t *testing.T) {
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{
 		IP:   net.ParseIP("127.0.0.1"),
