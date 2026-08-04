@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -8,6 +9,9 @@ import (
 
 	"github.com/miguelsaliba/gowol/wol"
 )
+
+//go:embed templates/*.html
+var templates embed.FS
 
 type Data struct {
 	Err       error
@@ -65,7 +69,7 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeHtml(w http.ResponseWriter, data Data) {
-	t, err := template.ParseFiles("tmpl/form.html")
+	t, err := template.ParseFS(templates, "templates/form.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
