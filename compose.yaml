@@ -1,0 +1,8 @@
+services:
+  gowol:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build-release-stage
+    network_mode: host
+    restart: unless-stopped

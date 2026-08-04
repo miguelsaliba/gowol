@@ -10,7 +10,8 @@ fmt:
 vet: fmt
 	go vet ./...
 
-build: vet cli server
+build: vet
+	go build -o $(BINDIR)/ ./cmd/...
 
 cli: vet
 	go build -o $(BINDIR)/gowol ./cmd/gowol

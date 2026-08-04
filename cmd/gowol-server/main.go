@@ -28,7 +28,7 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 		Port:      r.FormValue("port"),
 	}
 
-	slog.Debug("Request data", "mac", data.Mac, "broadcast", data.Broadcast, "port", data.Port)
+	slog.Info("Request data", "mac", data.Mac, "broadcast", data.Broadcast, "port", data.Port)
 
 	if data.Mac == "" && data.Broadcast == "" && data.Port == "" {
 		writeHtml(w, data)
