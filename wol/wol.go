@@ -10,13 +10,13 @@ import (
 
 type MACAddress [6]byte
 
-var ErrInvalidMAC = errors.New("invalid Wake-on-LAN MAC address")
+var ErrInvalidMAC = errors.New("invalid MAC address")
 var ErrInvalidIP = errors.New("invalid IP address")
 
 func ParseMac(mac string) (MACAddress, error) {
 	parsed, err := net.ParseMAC(mac)
 	if err != nil {
-		return MACAddress{}, fmt.Errorf("%w: %v", ErrInvalidMAC, err)
+		return MACAddress{}, fmt.Errorf("%w", ErrInvalidMAC)
 	}
 
 	if len(parsed) != 6 {
@@ -24,6 +24,14 @@ func ParseMac(mac string) (MACAddress, error) {
 	}
 
 	return MACAddress(parsed), nil
+}
+
+func ParseIP(ip string) (net.IP, error) {
+	parsed := net.ParseIP(ip)
+	if parsed == nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidIP, ip)
+	}
+	return parsed, nil
 }
 
 func createMagicPacket(mac MACAddress) []byte {

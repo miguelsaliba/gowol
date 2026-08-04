@@ -1,10 +1,8 @@
 package main
 
 import (
-	"errors"
 	"html/template"
 	"log/slog"
-	"net"
 	"net/http"
 	"strconv"
 
@@ -26,7 +24,7 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 		Port:      r.FormValue("port"),
 	}
 
-	slog.Error("Request data", "mac", data.Mac, "broadcast", data.Broadcast, "port", data.Port)
+	slog.Debug("Request data", "mac", data.Mac, "broadcast", data.Broadcast, "port", data.Port)
 
 	if data.Mac == "" && data.Broadcast == "" && data.Port == "" {
 		writeHtml(w, data)
@@ -40,9 +38,9 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parsedIP := net.ParseIP(data.Broadcast)
-	if parsedIP == nil {
-		data.Err = errors.New(data.Broadcast + " is not a valid broadcast range")
+	parsedIP, err := wol.ParseIP(data.Broadcast)
+	if err != nil {
+		data.Err = err
 		writeHtml(w, data)
 		return
 	}

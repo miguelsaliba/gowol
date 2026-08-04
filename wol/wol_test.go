@@ -22,25 +22,64 @@ func TestParseMac(t *testing.T) {
 		{Mac: "11:22", Parsed: MACAddress{}, Error: ErrInvalidMAC},
 		{Mac: "11:22:33:44", Parsed: MACAddress{}, Error: ErrInvalidMAC},
 	}
-	for _, test := range cases {
-		t.Run(test.Mac, func(t *testing.T) {
-			got, err := ParseMac(test.Mac)
+	for _, tt := range cases {
+		t.Run(tt.Mac, func(t *testing.T) {
+			got, err := ParseMac(tt.Mac)
 
 			switch {
-			case test.Error == nil && err != nil:
+			case tt.Error == nil && err != nil:
 				t.Errorf("unexpected error %v", err)
 
-			case test.Error != nil && err == nil:
-				t.Errorf("expected error %v but got nil", test.Error)
+			case tt.Error != nil && err == nil:
+				t.Errorf("expected error %v but got nil", tt.Error)
 
-			case !errors.Is(err, test.Error):
-				t.Errorf("expected error %v but got %v", test.Error, err)
+			case !errors.Is(err, tt.Error):
+				t.Errorf("expected error %v but got %v", tt.Error, err)
 
-			case test.Parsed != got:
-				t.Errorf("expected %v but got %v", test.Parsed, got)
+			case tt.Parsed != got:
+				t.Errorf("expected %v but got %v", tt.Parsed, got)
 			}
 		})
 
+	}
+}
+
+func TestParseIP(t *testing.T) {
+	cases := []struct {
+		input   string
+		want    net.IP
+		wantErr bool
+	}{
+		{input: "192.168.1.1", want: net.ParseIP("192.168.1.1")},
+		{input: "255.255.255.255", want: net.ParseIP("255.255.255.255")},
+		{input: "2001:db8::1", want: net.ParseIP("2001:db8::1")},
+		{input: "::1", want: net.ParseIP("::1")},
+		{input: "", wantErr: true},
+		{input: "not-an-ip", wantErr: true},
+		{input: "256.256.256.256", wantErr: true},
+		{input: "192.168.1", wantErr: true},
+		{input: "192.168.1.1.1", wantErr: true},
+		{input: "  192.168.1.1  ", wantErr: true},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.input, func(t *testing.T) {
+			got, err := ParseIP(tt.input)
+
+			switch {
+			case tt.wantErr && err == nil:
+				t.Fatalf("ParseIP(%q) expected error, got nil", tt.input)
+
+			case tt.wantErr && !errors.Is(err, ErrInvalidIP):
+				t.Errorf("ParseIP(%q) error = %v, want wrapped ErrInvalidIP", tt.input, err)
+
+			case !tt.wantErr && err != nil:
+				t.Fatalf("ParseIP(%q) unexpected error: %v", tt.input, err)
+
+			case !tt.wantErr && !got.Equal(tt.want):
+				t.Errorf("ParseIP(%q) = %v, want %v", tt.input, got, tt.want)
+			}
+		})
 	}
 }
 
