@@ -1,8 +1,6 @@
 services:
   gowol:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: build-release-stage
+    image: ghcr.io/miguelsaliba/gowol:latest
+    build: .
     network_mode: host
     restart: unless-stopped
