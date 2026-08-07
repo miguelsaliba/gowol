@@ -1,5 +1,5 @@
 # Build the application from source
-FROM golang:1.26 AS build-stage
+FROM golang:1.26 AS build
 
 WORKDIR /app
 
@@ -11,18 +11,18 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux make build
 
 # Run the tests in the container
-FROM build-stage AS run-test-stage
+FROM build-stage AS test
 RUN go test -v ./...
 
 # Deploy the application binary into a lean image
-FROM gcr.io/distroless/base-debian11 AS build-release-stage
+FROM gcr.io/distroless/base-debian13
 
 WORKDIR /
 
-COPY --from=build-stage /app/bin/* .
+COPY --from=build /app/bin/* /bin/
 
 EXPOSE 8080
 
 USER nonroot:nonroot
 
-ENTRYPOINT ["/gowol-server"]
+ENTRYPOINT ["/bin/gowol-server"]
