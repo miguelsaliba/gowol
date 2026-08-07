@@ -1,36 +1,38 @@
 # gowol
 
-A basic web server and cli to that sends magic wol packets to other devices on the network.
+A tiny self-hostable web server and cli that sends magic wol packets to other devices on the network.
 
 ## Installation
 
-### Docker compose (Recommended for self hosting)
+#### Docker compose (Recommended for self hosting)
 
-- Download the `compose.yaml` file in this repo.
+- Download the [`compose.yaml`](./compose.yaml) file in this repo.
 - Modify it to your needs
 - Run `docker compose up -d`
-- It should now be running on `http://127.0.0.1:2611/`
+- It should now be running on http://127.0.0.1:2611/
 
-### Docker
+You can now also run commands with the cli using `docker compose exec gowol gowol --help`
+
+#### Docker
 
 ```bash
 docker run --network host ghcr.io/miguelsaliba/gowol:latest
 ```
 
-### Build from source
+#### Build from source
 
 - Make sure Go is installed (minimum version 1.26)
 - Clone the repo `git clone https://github.com/miguelsaliba/gowol/`
-- Build using `make build` or `go build -o bin/ ./cmd/...`
+- Build using `make build` (or `make cli` or `make server` if you want only the cli or server respectively)
 - Run with `./bin/gowol` or `./bin/gowol-server`
 
-### Releases (Planned)
+#### Releases (Planned)
 
 No releases yet
 
 ## Usage
 
-### CLI
+#### CLI
 
 ```bash
 Usage:
@@ -43,9 +45,17 @@ Arguments:
   -v, --verbose            Enable verbose logging
 ```
 
-### Server
+#### Server
 
 Simply run with `gowol-server` or follow the docker installation and it should be running on http://127.0.0.1:2611/
+
+## Configuration
+
+Server configuration is done through environment variables:
+
+| Variable   | Description         |
+|------------|---------------------|
+| `GOWOL_PORT` | Port (default 2611) |
 
 ## References
 
