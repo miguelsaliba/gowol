@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/miguelsaliba/gowol/wol"
@@ -28,12 +29,12 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 		Port:      r.FormValue("port"),
 	}
 
-	slog.Info("Request data", "mac", data.Mac, "broadcast", data.Broadcast, "port", data.Port)
-
 	if data.Mac == "" && data.Broadcast == "" && data.Port == "" {
 		writeHtml(w, data)
 		return
 	}
+
+	slog.Info("Request data", "mac", data.Mac, "broadcast", data.Broadcast, "port", data.Port)
 
 	parsedMac, err := wol.ParseMac(data.Mac)
 	if err != nil {
@@ -76,9 +77,19 @@ func writeHtml(w http.ResponseWriter, data Data) {
 	t.Execute(w, data)
 }
 
+// Returns environment variable if exists, otherwise returns fallback
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
+}
+
 func main() {
-	port := "8080"
+	port := getEnv("GOWOL_PORT", "2611")
+
 	http.HandleFunc("/", wolHandler)
+
 	slog.Info("Serving on address http://127.0.0.1:" + port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		slog.Error("Error starting server", "error", err)

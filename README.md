@@ -9,7 +9,7 @@ A basic web server and cli to that sends magic wol packets to other devices on t
 - Download the `compose.yaml` file in this repo.
 - Modify it to your needs
 - Run `docker compose up -d`
-- It should now be running on `http://127.0.0.1:8080/`
+- It should now be running on `http://127.0.0.1:2611/`
 
 ### Docker
 
@@ -45,7 +45,7 @@ Arguments:
 
 ### Server
 
-Simply run with `gowol-server` or follow the docker installation and it should be running on http://127.0.0.1:8080/
+Simply run with `gowol-server` or follow the docker installation and it should be running on http://127.0.0.1:2611/
 
 ## References
 

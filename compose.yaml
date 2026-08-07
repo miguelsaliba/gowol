@@ -4,3 +4,5 @@ services:
     build: .
     network_mode: host
     restart: unless-stopped
+    environment:
+      GOWOL_PORT: 2611
