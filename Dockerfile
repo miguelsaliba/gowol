@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux make build
+RUN make release
 
 # Run the tests in the container
 FROM build-stage AS test

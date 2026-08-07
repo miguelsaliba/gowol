@@ -25,5 +25,8 @@ run-gowol:
 run-gowol-server:
 	go run ./cmd/gowol-server
 
+release: vet
+	CGO_ENABLED=0 go build -ldflags "-s" -o $(BINDIR)/ ./cmd/...
+
 clean:
 	rm -rf $(BINDIR)
