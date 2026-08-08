@@ -1,7 +1,6 @@
 services:
   gowol:
-    image: ghcr.io/miguelsaliba/gowol:latest
-    build: .
+    image: miguelsaliba/gowol:latest
     network_mode: host
     restart: unless-stopped
     environment:
