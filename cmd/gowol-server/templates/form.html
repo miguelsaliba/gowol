@@ -3,15 +3,111 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Gowol</title>
+        <title>gowol</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+        <style>
+            /* Gruvbox colors */
+            :root {
+                --white: #D5C4A1;
+                --black: #1D2021;
+                --blue: #83A598;
+                --red: #FB4934;
+                --green: #B8BB26;
+                --yellow: #FABD2F;
+                --magenta: #D3869B;
+                --cyan: #8EC07C;
+                --bright-white: #FBF1C7;
+                --bright-black: #665C54;
+                --bright-blue: #83A598;
+                --bright-red: #FB4934;
+                --bright-green: #B8BB26;
+                --bright-yellow: #FABD2F;
+                --bright-magenta: #D3869B;
+                --bright-cyan: #8EC07C;
+            }
+
+            html * {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 1.5rem;
+            }
+
+            body {
+                background-color: var(--black);
+                color: var(--white);
+                width: 100%;
+                height: 100%;
+                margin: 2rem;
+            }
+
+            input {
+                background-color: var(--bright-black);
+                color: var(--bright-white);
+                margin: 0;
+                padding: 0 1ch;
+                border: none;
+                outline: none;
+            }
+            input:placeholder {
+                color: var(--white);
+            }
+
+            label {
+                display: flex;
+                align-items: center;
+            }
+
+            label > span {
+                display: inline-block;
+                width: 12ch;
+                flex-shrink: 0;
+            }
+
+            button {
+                padding: 1ch;
+                background-color: var(--white);
+                border: none;
+                border-radius: 0;
+                outline: none;
+            }
+
+            button:active {
+                background-color: var(--bright-blue);
+                color: var(--bright-white);
+            }
+
+            pre {
+                margin: 0;
+            }
+
+            .dollar {
+                color: var(--green);
+            }
+
+            input[type=number]::-webkit-inner-spin-button,
+            input[type=number]::-webkit-outer-spin-button {
+              -webkit-appearance: none;
+            }
+
+            input[type=number] {
+              -moz-appearance: textfield;
+            }
+
+            .error {
+                color: var(--red);
+            }
+
+            .message {
+                color: var(--green);
+            }
+        </style>
     </head>
 
     <body>
         <form>
-            <p><b>Enter a Mac Address, IP broadcast, and port to wake on lan:</b></p>
-
             <label>
-                Mac Address:
+                <span><span class="dollar">$</span> gowol</span>
                 <input
                     type="text"
                     id="mac"
@@ -22,10 +118,11 @@
                     placeholder="11:22:33:44:55:66"
                     required
                 />
+                <pre> \</pre>
             </label>
-            <br><br>
+            <br>
             <label>
-                IP Broadcast:
+                <span>--broadcast</span>
                 <input
                     type="text"
                     id="broadcast"
@@ -36,10 +133,11 @@
                     placeholder="255.255.255.255"
                     required
                 />
+                <pre> \</pre>
             </label>
-            <br><br>
+            <br>
             <label>
-                Port:
+                <span>--port</span>
                 <input
                     type="number"
                     id="port"
@@ -51,13 +149,13 @@
                     required
                 />
             </label>
-            <br><br>
-            <button type="submit">Wake on LAN</button>
+            <br>
+            <button type="submit">Enter</button>
         </form>
 
         {{ with .Err }}
             <br>
-            <div class="error">{{ . }}</div>
+            <div class="error">error: {{ . }}</div>
         {{ end }}
 
         {{ with .Msg }}
