@@ -6,63 +6,6 @@ import (
 	"testing"
 )
 
-func TestValidateInputs(t *testing.T) {
-	tests := []struct {
-		name       string
-		broadcast  string
-		mac        string
-		wantErr    bool
-		wantErrMsg string
-	}{
-		{
-			name:      "valid inputs",
-			broadcast: "255.255.255.255",
-			mac:       "00:11:22:33:44:55",
-			wantErr:   false,
-		},
-		{
-			name:       "invalid broadcast address",
-			broadcast:  "not-an-ip",
-			mac:        "00:11:22:33:44:55",
-			wantErr:    true,
-			wantErrMsg: "invalid broadcast IP address",
-		},
-		{
-			name:       "invalid mac address",
-			broadcast:  "255.255.255.255",
-			mac:        "not-a-mac",
-			wantErr:    true,
-			wantErrMsg: "invalid MAC address",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ip, mac, err := validateInputs(tt.broadcast, tt.mac)
-
-			if tt.wantErr {
-				if err == nil {
-					t.Fatalf("expected error, got nil")
-				}
-				if !strings.Contains(err.Error(), tt.wantErrMsg) {
-					t.Errorf("expected error to contain %q, got %q", tt.wantErrMsg, err.Error())
-				}
-				return
-			}
-
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if ip == nil {
-				t.Error("expected non-nil IP")
-			}
-			if mac == (interface{}(nil)) {
-				t.Error("expected non-zero MAC address")
-			}
-		})
-	}
-}
-
 func TestRun(t *testing.T) {
 	tests := []struct {
 		name       string

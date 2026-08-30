@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"net"
 	"os"
 
 	flag "github.com/spf13/pflag"
@@ -59,11 +58,15 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
-	macStr := fs.Arg(0)
-
-	ip, mac, err := validateInputs(*flags.broadcast, macStr)
+	ip, err := wol.ParseIP(*flags.broadcast)
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error("Invalid broadcast address", "error", err)
+		return 1
+	}
+
+	mac, err := wol.ParseMAC(fs.Arg(0))
+	if err != nil {
+		slog.Error("Invalid MAC address", "error", err)
 		return 1
 	}
 
@@ -73,20 +76,6 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	return 0
-}
-
-func validateInputs(broadcastStr, macStr string) (net.IP, wol.MACAddress, error) {
-	ip := net.ParseIP(broadcastStr)
-	if ip == nil {
-		return nil, wol.MACAddress{}, fmt.Errorf("invalid broadcast IP address: %s", broadcastStr)
-	}
-
-	mac, err := wol.ParseMAC(macStr)
-	if err != nil {
-		return nil, wol.MACAddress{}, fmt.Errorf("invalid MAC address %q: %w", macStr, err)
-	}
-
-	return ip, mac, nil
 }
 
 func printUsage(fs *flag.FlagSet, w io.Writer) {
