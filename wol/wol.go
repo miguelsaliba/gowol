@@ -13,10 +13,10 @@ type MACAddress [6]byte
 var ErrInvalidMAC = errors.New("invalid MAC address")
 var ErrInvalidIP = errors.New("invalid IP address")
 
-func ParseMac(mac string) (MACAddress, error) {
+func ParseMAC(mac string) (MACAddress, error) {
 	parsed, err := net.ParseMAC(mac)
 	if err != nil {
-		return MACAddress{}, fmt.Errorf("%w", ErrInvalidMAC)
+		return MACAddress{}, ErrInvalidMAC
 	}
 
 	if len(parsed) != 6 {
@@ -35,11 +35,13 @@ func ParseIP(ip string) (net.IP, error) {
 }
 
 func createMagicPacket(mac MACAddress) []byte {
-	syncStream := bytes.Repeat([]byte{0xFF}, 6)
-	return append(syncStream, bytes.Repeat(mac[:], 16)...)
+	packet := make([]byte, 0, 6+len(mac)*16)
+	packet = append(packet, bytes.Repeat([]byte{0xFF}, 6)...)
+	packet = append(packet, bytes.Repeat(mac[:], 16)...)
+	return packet
 }
 
-func Wol(ip net.IP, port uint16, mac MACAddress) error {
+func Send(ip net.IP, port uint16, mac MACAddress) error {
 	if ip == nil {
 		return ErrInvalidIP
 	}

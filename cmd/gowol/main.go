@@ -67,7 +67,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 
-	if err := wol.Wol(ip, uint16(*flags.port), mac); err != nil {
+	if err := wol.Send(ip, uint16(*flags.port), mac); err != nil {
 		slog.Error("Failed to send WOL packet", "error", err)
 		return 1
 	}
@@ -81,7 +81,7 @@ func validateInputs(broadcastStr, macStr string) (net.IP, wol.MACAddress, error)
 		return nil, wol.MACAddress{}, fmt.Errorf("invalid broadcast IP address: %s", broadcastStr)
 	}
 
-	mac, err := wol.ParseMac(macStr)
+	mac, err := wol.ParseMAC(macStr)
 	if err != nil {
 		return nil, wol.MACAddress{}, fmt.Errorf("invalid MAC address %q: %w", macStr, err)
 	}

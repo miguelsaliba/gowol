@@ -36,7 +36,7 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 
 	slog.Info("Request data", "mac", data.Mac, "broadcast", data.Broadcast, "port", data.Port)
 
-	parsedMac, err := wol.ParseMac(data.Mac)
+	parsedMac, err := wol.ParseMAC(data.Mac)
 	if err != nil {
 		data.Err = err
 		writeHtml(w, data)
@@ -58,7 +58,7 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	parsedPort := uint16(parsedPort64)
 
-	err = wol.Wol(parsedIP, parsedPort, parsedMac)
+	err = wol.Send(parsedIP, parsedPort, parsedMac)
 	if err != nil {
 		data.Err = err
 		writeHtml(w, data)

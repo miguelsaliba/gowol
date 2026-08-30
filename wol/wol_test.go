@@ -24,7 +24,7 @@ func TestParseMac(t *testing.T) {
 	}
 	for _, tt := range cases {
 		t.Run(tt.Mac, func(t *testing.T) {
-			got, err := ParseMac(tt.Mac)
+			got, err := ParseMAC(tt.Mac)
 
 			switch {
 			case tt.Error == nil && err != nil:
@@ -115,8 +115,8 @@ func TestWol_SendsCorrectPacket(t *testing.T) {
 	addr := listener.LocalAddr().(*net.UDPAddr)
 	mac := MACAddress{0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x01}
 
-	if err := Wol(net.ParseIP("127.0.0.1"), uint16(addr.Port), mac); err != nil {
-		t.Fatalf("Wol returned error: %v", err)
+	if err := Send(net.ParseIP("127.0.0.1"), uint16(addr.Port), mac); err != nil {
+		t.Fatalf("Send returned error: %v", err)
 	}
 
 	buf := make([]byte, 128)
