@@ -14,6 +14,8 @@ import (
 //go:embed templates/*.html
 var templates embed.FS
 
+var formTemplate = template.Must(template.ParseFS(templates, "templates/form.html"))
+
 type Data struct {
 	Err       error
 	Msg       string
@@ -30,7 +32,7 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if data.Mac == "" && data.Broadcast == "" && data.Port == "" {
-		writeHtml(w, data)
+		writeHTML(w, data)
 		return
 	}
 
@@ -39,21 +41,21 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 	parsedMac, err := wol.ParseMAC(data.Mac)
 	if err != nil {
 		data.Err = err
-		writeHtml(w, data)
+		writeHTML(w, data)
 		return
 	}
 
 	parsedIP, err := wol.ParseIP(data.Broadcast)
 	if err != nil {
 		data.Err = err
-		writeHtml(w, data)
+		writeHTML(w, data)
 		return
 	}
 
 	parsedPort64, err := strconv.ParseUint(data.Port, 10, 16)
 	if err != nil {
 		data.Err = err
-		writeHtml(w, data)
+		writeHTML(w, data)
 		return
 	}
 	parsedPort := uint16(parsedPort64)
@@ -61,20 +63,18 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 	err = wol.Send(parsedIP, parsedPort, parsedMac)
 	if err != nil {
 		data.Err = err
-		writeHtml(w, data)
+		writeHTML(w, data)
 		return
 	}
 
 	data.Msg = "WOL successful! Bookmark this URL to use it again"
-	writeHtml(w, data)
+	writeHTML(w, data)
 }
 
-func writeHtml(w http.ResponseWriter, data Data) {
-	t, err := template.ParseFS(templates, "templates/form.html")
-	if err != nil {
+func writeHTML(w http.ResponseWriter, data Data) {
+	if err := formTemplate.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	t.Execute(w, data)
 }
 
 // Returns environment variable if exists, otherwise returns fallback
