@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/miguelsaliba/gowol/wol"
 )
@@ -88,10 +89,19 @@ func getEnv(key, fallback string) string {
 func main() {
 	port := getEnv("GOWOL_PORT", "2611")
 
-	http.HandleFunc("/", wolHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", wolHandler)
+
+	server := &http.Server{
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+	}
 
 	slog.Info("Serving on address http://127.0.0.1:" + port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		slog.Error("Error starting server", "error", err)
 	}
 }
