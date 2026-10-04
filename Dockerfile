@@ -11,7 +11,7 @@ COPY . .
 RUN make release
 
 # Run the tests in the container
-FROM build-stage AS test
+FROM build AS test
 RUN go test -v ./...
 
 # Deploy the application binary into a lean image
