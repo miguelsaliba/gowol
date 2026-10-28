@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"html/template"
 	"log/slog"
@@ -33,7 +34,7 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if data.Mac == "" && data.Broadcast == "" && data.Port == "" {
-		writeHTML(w, data)
+		render(w, http.StatusOK, data)
 		return
 	}
 
@@ -42,21 +43,21 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 	parsedMac, err := wol.ParseMAC(data.Mac)
 	if err != nil {
 		data.Err = err
-		writeHTML(w, data)
+		render(w, http.StatusBadRequest, data)
 		return
 	}
 
 	parsedIP, err := wol.ParseIP(data.Broadcast)
 	if err != nil {
 		data.Err = err
-		writeHTML(w, data)
+		render(w, http.StatusBadRequest, data)
 		return
 	}
 
 	parsedPort64, err := strconv.ParseUint(data.Port, 10, 16)
 	if err != nil {
 		data.Err = err
-		writeHTML(w, data)
+		render(w, http.StatusBadRequest, data)
 		return
 	}
 	parsedPort := uint16(parsedPort64)
@@ -64,18 +65,25 @@ func wolHandler(w http.ResponseWriter, r *http.Request) {
 	err = wol.Send(parsedIP, parsedPort, parsedMac)
 	if err != nil {
 		data.Err = err
-		writeHTML(w, data)
+		render(w, http.StatusInternalServerError, data)
 		return
 	}
 
 	data.Msg = "WOL successful! Bookmark this URL to use it again"
-	writeHTML(w, data)
+	render(w, http.StatusOK, data)
 }
 
-func writeHTML(w http.ResponseWriter, data Data) {
-	if err := formTemplate.Execute(w, data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+// Renders the form into a buffer first so a template error never produces a partial page
+func render(w http.ResponseWriter, status int, data Data) {
+	var buf bytes.Buffer
+	if err := formTemplate.Execute(&buf, data); err != nil {
+		slog.Error("Error rendering template", "error", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
 	}
+
+	w.WriteHeader(status)
+	buf.WriteTo(w)
 }
 
 // Returns environment variable if exists, otherwise returns fallback
