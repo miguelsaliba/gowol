@@ -131,12 +131,10 @@ func getEnv(key, fallback string) string {
 func main() {
 	port := getEnv("GOWOL_PORT", "2611")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", wolHandler)
+	http.HandleFunc("GET /{$}", wolHandler)
 
 	server := &http.Server{
 		Addr:              ":" + port,
-		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
