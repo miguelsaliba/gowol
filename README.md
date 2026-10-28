@@ -2,6 +2,8 @@
 
 A tiny self-hostable web server and cli that sends magic wol packets to other devices on the network.
 
+![gowol web interface](docs/screenshot.png)
+
 ## Installation
 
 #### Docker compose (Recommended for self hosting)
