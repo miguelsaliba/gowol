@@ -129,6 +129,13 @@ func getEnv(key, fallback string) string {
 }
 
 func main() {
+	var level slog.Level
+	if err := level.UnmarshalText([]byte(getEnv("GOWOL_LOG_LEVEL", "info"))); err != nil {
+		slog.Error("Invalid GOWOL_LOG_LEVEL", "error", err)
+		os.Exit(1)
+	}
+	slog.SetLogLoggerLevel(level)
+
 	port := getEnv("GOWOL_PORT", "2611")
 
 	http.HandleFunc("GET /{$}", wolHandler)
@@ -140,8 +147,9 @@ func main() {
 		WriteTimeout:      10 * time.Second,
 	}
 
-	slog.Info("Serving on address http://127.0.0.1:" + port)
+	slog.Info("Serving on all interfaces", "port", port)
 	if err := server.ListenAndServe(); err != nil {
 		slog.Error("Error starting server", "error", err)
+		os.Exit(1)
 	}
 }

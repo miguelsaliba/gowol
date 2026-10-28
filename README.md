@@ -53,9 +53,10 @@ Simply run with `gowol-server` or follow the docker installation and it should b
 
 Server configuration is done through environment variables:
 
-| Variable   | Description         |
-|------------|---------------------|
-| `GOWOL_PORT` | Port (default 2611) |
+| Variable          | Description                                                    |
+|-------------------|----------------------------------------------------------------|
+| `GOWOL_PORT`      | Port (default 2611)                                            |
+| `GOWOL_LOG_LEVEL` | Log level: `debug`, `info`, `warn` or `error` (default `info`) |
 
 ## References
 
