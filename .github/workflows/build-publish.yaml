@@ -42,6 +42,8 @@ jobs:
           images: |
             ${{ env.DOCKERHUB_REPOSITORY }}
             ghcr.io/${{ github.repository }}
+          flavor: |
+            prefix=v
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
